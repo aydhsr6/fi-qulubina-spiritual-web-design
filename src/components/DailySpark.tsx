@@ -1,176 +1,201 @@
-import { useEffect, useState } from "react";
-import { cn } from "../utils/cn";
-import { CATEGORIES, KIND_META, type Quote } from "../data/quotes";
-import {
-  IconCopy,
-  IconHeart,
-  IconPalette,
-  IconShare,
-  IconShuffle,
-  IconSparkles,
-} from "./icons";
+import React, { useState } from 'react';
+import { Quote } from '../types';
+import { cleanQuoteText } from '../utils/quoteText';
+import { 
+  Sparkles, 
+  Shuffle, 
+  Copy, 
+  Share2, 
+  Heart, 
+  Palette, 
+  BookOpen, 
+  Check,
+  Compass
+} from 'lucide-react';
 
 interface DailySparkProps {
   quote: Quote;
-  isFavorite: boolean;
   onShuffle: () => void;
-  onCopy: () => void;
-  onShare: () => void;
-  onToggleFavorite: () => void;
-  onDesign: () => void;
+  onCopy: (quote: Quote) => void;
+  onShare: (quote: Quote) => void;
+  onDesignCard: (quote: Quote) => void;
+  isFavorite: boolean;
+  onToggleFavorite: (quote: Quote) => void;
+  copiedId: string | null;
 }
 
-const todayLabel = () =>
-  new Date().toLocaleDateString("ar", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-
-export function DailySpark({
+export const DailySpark: React.FC<DailySparkProps> = ({
   quote,
-  isFavorite,
   onShuffle,
   onCopy,
   onShare,
+  onDesignCard,
+  isFavorite,
   onToggleFavorite,
-  onDesign,
-}: DailySparkProps) {
-  const [date, setDate] = useState("");
-  useEffect(() => setDate(todayLabel()), []);
+  copiedId
+}) => {
+  const [isSpinning, setIsSpinning] = useState(false);
 
-  const kind = KIND_META[quote.kind];
-  const category = CATEGORIES.find((c) => c.key === quote.category);
+  const handleShuffle = () => {
+    setIsSpinning(true);
+    onShuffle();
+    setTimeout(() => setIsSpinning(false), 600);
+  };
+
+  const isCopied = copiedId === quote.id;
+
+  const typeLabels = {
+    quran: 'آية وتدبر',
+    hadith: 'حديث شريف',
+    scholar: 'درة من الأثر',
+    reflection: 'خاطرة للروح'
+  };
 
   return (
-    <section
-      aria-label="بريق اليوم"
-      className="relative overflow-hidden rounded-[2rem] border border-gold-300/40 bg-gradient-to-bl from-emerald-800 via-emerald-900 to-night-950 px-5 py-8 text-emerald-50 shadow-[0_30px_70px_-30px_rgba(4,47,31,0.75)] sm:px-10 sm:py-12"
-    >
-      {/* زخارف */}
-      <div className="geo-pattern-lg pointer-events-none absolute inset-0 opacity-[0.13]" />
-      <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-gold-400/25 blur-3xl animate-float-slow" />
-      <div className="pointer-events-none absolute -left-20 bottom-[-6rem] h-64 w-64 rounded-full bg-emerald-400/20 blur-3xl" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-night-950/60 to-transparent" />
+    <section id="daily-spark" className="relative py-8 sm:py-12 overflow-hidden">
+      {/* Background Decorative Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-72 bg-gradient-to-r from-emerald-500/15 via-teal-400/10 to-amber-400/15 blur-3xl pointer-events-none rounded-full" />
 
-      <div className="relative mx-auto max-w-3xl text-center">
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <span className="inline-flex items-center gap-2 rounded-full border border-gold-300/50 bg-gold-300/10 px-4 py-1.5 text-xs font-bold tracking-wide text-gold-200">
-            <IconSparkles className="h-4 w-4" />
-            بريق اليوم
-          </span>
-          {date && (
-            <span className="text-xs font-medium text-emerald-200/70">{date}</span>
-          )}
-        </div>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 relative">
+        <div className="relative rounded-3xl bg-gradient-to-br from-emerald-900 via-emerald-950 to-teal-950 text-stone-100 p-6 sm:p-10 shadow-2xl shadow-emerald-950/40 border border-emerald-500/30 overflow-hidden">
+          
+          {/* Subtle Arabesque Motif SVG in Background */}
+          <div className="absolute -top-16 -left-16 w-64 h-64 opacity-10 pointer-events-none text-amber-300">
+            <svg viewBox="0 0 200 200" fill="currentColor">
+              <path d="M100 0 L120 70 L190 70 L135 110 L155 180 L100 140 L45 180 L65 110 L10 70 L80 70 Z" />
+            </svg>
+          </div>
+          <div className="absolute -bottom-20 -right-20 w-72 h-72 opacity-10 pointer-events-none text-emerald-300">
+            <svg viewBox="0 0 200 200" fill="currentColor">
+              <circle cx="100" cy="100" r="80" stroke="currentColor" strokeWidth="4" fill="none" />
+              <circle cx="100" cy="100" r="50" stroke="currentColor" strokeWidth="2" fill="none" />
+            </svg>
+          </div>
 
-        <blockquote
-          key={quote.id}
-          className={cn(
-            "animate-pop mt-7 leading-[2] text-emerald-50",
-            quote.kind === "hadith"
-              ? "font-iphone text-2xl font-semibold tracking-[-0.01em] sm:text-[1.9rem] sm:leading-[1.95] md:text-[2rem]"
-              : "font-serif text-2xl sm:text-3xl sm:leading-[1.9] md:text-[2.1rem]",
-          )}
-        >
-          {quote.text}
-        </blockquote>
+          {/* Header Row: Badge & Shuffle */}
+          <div className="flex items-center justify-between gap-4 mb-6 relative z-10">
+            <div className="flex items-center gap-2.5">
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-400/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                <span>قبس اليوم المعطر</span>
+              </span>
+              <span className="text-xs text-emerald-300/80 font-medium hidden sm:inline-block">
+                • {typeLabels[quote.type]}
+                {quote.type === 'hadith' && ' • بخط الآيفون'}
+              </span>
+            </div>
 
-        {quote.translation && (
-          <p
-            dir="ltr"
-            className="mx-auto mt-5 max-w-xl text-left text-sm leading-relaxed text-emerald-200/75 italic"
-          >
-            “{quote.translation}”
-          </p>
-        )}
+            <button
+              onClick={handleShuffle}
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-800/80 hover:bg-emerald-700/80 text-emerald-200 text-xs font-medium border border-emerald-600/40 transition-all duration-200 hover:shadow-lg active:scale-95"
+              title="تغيير القبس عشوائياً"
+            >
+              <Shuffle className={`w-3.5 h-3.5 transition-transform duration-500 ${isSpinning ? 'rotate-180' : ''}`} />
+              <span>قبس آخر</span>
+            </button>
+          </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm">
-          <span className="font-bold text-gold-200">{quote.author}</span>
-          <span className="h-1 w-1 rounded-full bg-gold-300/60" />
-          <span className="text-emerald-100/70">{quote.source}</span>
-          <span className="rounded-full bg-emerald-950/50 px-3 py-1 text-xs text-emerald-200/80 ring-1 ring-emerald-400/20">
-            {kind.icon} {kind.short}
-          </span>
-          {category && (
-            <span className="rounded-full bg-emerald-950/50 px-3 py-1 text-xs text-emerald-200/80 ring-1 ring-emerald-400/20">
-              {category.icon} {category.label}
-            </span>
-          )}
-        </div>
+          {/* Main Quote Text */}
+          <div className="my-8 sm:my-12 text-center px-2 sm:px-8 relative z-10">
+            <p 
+              className={`text-xl sm:text-2xl md:text-3xl leading-relaxed sm:leading-loose font-medium text-amber-50 drop-shadow-sm transition-all duration-300 ${
+                quote.type === 'hadith' ? 'font-iphone font-normal' : ''
+              }`}
+              style={{ 
+                fontFamily: quote.type === 'hadith' 
+                  ? '-apple-system, BlinkMacSystemFont, "SF Pro Arabic", "SF Pro Text", "IBM Plex Sans Arabic", "Geeza Pro", sans-serif'
+                  : quote.type === 'quran' 
+                  ? "'Amiri', serif" 
+                  : "'Aref Ruqaa', 'Amiri', serif" 
+              }}
+            >
+              {cleanQuoteText(quote.text)}
+            </p>
+          </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
-          <button
-            type="button"
-            onClick={onShuffle}
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-l from-gold-300 via-gold-400 to-gold-500 px-6 py-3 text-sm font-bold text-night-900 shadow-lg shadow-gold-900/20 transition hover:brightness-110 active:scale-95"
-          >
-            <IconShuffle className="h-4.5 w-4.5" />
-            اقتباس آخر
-          </button>
+          {/* Source Attribution & Explanation */}
+          <div className="flex flex-col items-center justify-center gap-2 relative z-10 mb-6 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-800/60 border border-emerald-600/40 text-amber-300 text-xs sm:text-sm font-semibold tracking-wide shadow-inner">
+              <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+              <span>{quote.author ? `${quote.author} • ${quote.source}` : quote.source}</span>
+            </div>
 
-          <SparkAction onClick={onCopy} label="انسخ النص">
-            <IconCopy className="h-4.5 w-4.5" />
-            نسخ
-          </SparkAction>
-
-          <SparkAction onClick={onShare} label="شارك">
-            <IconShare className="h-4.5 w-4.5" />
-            مشاركة
-          </SparkAction>
-
-          <SparkAction
-            onClick={onDesign}
-            label="صمّم بطاقة"
-            className="border-gold-300/40 text-gold-200"
-          >
-            <IconPalette className="h-4.5 w-4.5" />
-            تصميم بطاقة
-          </SparkAction>
-
-          <button
-            type="button"
-            onClick={onToggleFavorite}
-            aria-pressed={isFavorite}
-            className={cn(
-              "inline-flex h-11 w-11 items-center justify-center rounded-full border transition active:scale-95",
-              isFavorite
-                ? "border-rose-300/60 bg-rose-400/20 text-rose-200"
-                : "border-emerald-200/25 bg-emerald-950/40 text-emerald-100/80 hover:border-rose-300/50 hover:text-rose-200",
+            {quote.explanation && (
+              <p className="text-xs sm:text-sm text-stone-300/90 max-w-2xl text-center leading-normal mt-1 flex items-center justify-center gap-1.5 font-light">
+                <Compass className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>{quote.explanation}</span>
+              </p>
             )}
-            aria-label={isFavorite ? "إزالة من المفضلة" : "أضف إلى المفضلة"}
-            title={isFavorite ? "إزالة من المفضلة" : "أضف إلى المفضلة"}
-          >
-            <IconHeart className="h-5 w-5" filled={isFavorite} />
-          </button>
+          </div>
+
+          {/* Action Toolbar */}
+          <div className="pt-4 border-t border-emerald-800/60 flex flex-wrap items-center justify-between gap-3 relative z-10">
+            
+            {/* Tags */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {quote.tags.map((tag, idx) => (
+                <span
+                  key={idx}
+                  className="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-900/80 text-emerald-300/90 border border-emerald-700/40"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              {/* Copy */}
+              <button
+                onClick={() => onCopy(quote)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  isCopied
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-emerald-800/70 hover:bg-emerald-700 text-emerald-100'
+                }`}
+                title="نسخ النص"
+              >
+                {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{isCopied ? 'تم النسخ' : 'نسخ'}</span>
+              </button>
+
+              {/* Share */}
+              <button
+                onClick={() => onShare(quote)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-emerald-800/70 hover:bg-emerald-700 text-emerald-100 transition-all"
+                title="مشاركة النص"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>مشاركة</span>
+              </button>
+
+              {/* Favorite */}
+              <button
+                onClick={() => onToggleFavorite(quote)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  isFavorite
+                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                    : 'bg-emerald-800/70 hover:bg-emerald-700 text-emerald-100'
+                }`}
+                title="حفظ في المفضلة"
+              >
+                <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-rose-400 text-rose-400' : ''}`} />
+                <span>{isFavorite ? 'محفوظة' : 'حفظ'}</span>
+              </button>
+
+              {/* Design Card */}
+              <button
+                onClick={() => onDesignCard(quote)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 shadow-md hover:shadow-amber-500/20 transition-all"
+                title="صمم بطاقة جاهزة للنشر والتنزيل"
+              >
+                <Palette className="w-3.5 h-3.5 text-stone-950" />
+                <span>صمّم بطاقة</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
-}
-
-function SparkAction({
-  children,
-  onClick,
-  label,
-  className,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  label: string;
-  className?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-2 rounded-full border border-emerald-200/25 bg-emerald-950/40 px-5 py-3 text-sm font-semibold text-emerald-50/90 transition hover:border-gold-300/50 hover:text-gold-100 active:scale-95",
-        className,
-      )}
-    >
-      {children}
-      <span className="sr-only">{label}</span>
-    </button>
-  );
-}
+};
